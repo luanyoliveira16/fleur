@@ -7,7 +7,7 @@ export default function Header() {
         <View style={styles.header}>
             <View style={styles.logoContainer}>
                 <Image
-                    source={require("../assets/images/logoIcon.png")}
+                    source={require("../assets/images/logoFleur.png")}
                     style={styles.icon}
                     resizeMode="contain"
                 />
