@@ -14,7 +14,7 @@ const WelcomeScreen: React.FC = () => {
       {/*Logo*/}
       <View style={styles.logoContainer}>
         <Image
-          source={require('../../assets/images/icon flor.jpg')} 
+          source={require('../../assets/images/icon_flor.jpg')}
           style={styles.logo}
           accessibilityLabel="Logo Fleur"
         />

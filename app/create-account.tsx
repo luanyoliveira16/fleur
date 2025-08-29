@@ -19,7 +19,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../services/firebase';
 
 // Validação
 const schema = yup.object({
@@ -65,7 +65,7 @@ export default function CreateAccountScreen() {
   return (
     <ThemedView style={styles.container}>
       <Image
-    source={require('../../assets/images/icon flor.jpg')} 
+    source={require('../assets/images/icon_flor.jpg')}
     style={styles.logo} 
     resizeMode="contain" 
   />

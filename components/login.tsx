@@ -58,7 +58,7 @@ return (
 
 <View style={{ alignItems: 'center', marginBottom: 32 }}>
     <Image
-    source={require('@/assets/images/icon flor.jpg')}  // 
+    source={require('@/assets/images/icon_flor.jpg')}  //
     style={{ width: 300, height: 80, resizeMode: 'contain' }} 
     />
         <Text style={{ fontSize: 25, fontWeight: 'bold', color: '#762C61', marginTop: 12 }}>
@@ -149,7 +149,7 @@ return (
       {/* Link Criar Conta */}
 
 <TouchableOpacity
-onPress={() => router.push('/create-account')}accessible
+onPress={() => router.push('/create-account')}
 accessibilityLabel="Criar Conta"
 >
     <Text style={{ color: '#762C61', textAlign: 'center', fontWeight: 'bold' }}>

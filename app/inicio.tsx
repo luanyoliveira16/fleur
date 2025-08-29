@@ -21,7 +21,7 @@ const InicioScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../../assets/images/Início.png')}
+        source={require('../assets/images/Início.png')}
         style={styles.logo}
         resizeMode="contain"
       />
