@@ -12,7 +12,7 @@ import { useRouter } from 'expo-router';
 
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../services/firebase';
 import { Image } from 'react-native';
 
 const LoginScreen: React.FC = () => {
@@ -46,7 +46,7 @@ const handleLogin = async (): Promise<void> => {
         await signInWithEmailAndPassword(auth, username, password);
         setLoading(false);
         Alert.alert('Sucesso', 'Login realizado com sucesso.');
-        router.push('/explore');
+        router.push('/inicio');
     } catch (error) {
         setLoading(false);
         setError('Usuário ou senha inválidos.');
