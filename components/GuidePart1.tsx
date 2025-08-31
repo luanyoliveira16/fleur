@@ -1,10 +1,15 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import Header from "./Header"; 
+import Header from "../components/Header"; 
 
 export default function GuidePart1() {
   const router = useRouter();
+
+  const handleOpenMaePaulistanaLink = () => {
+    Linking.openURL("https://prefeitura.sp.gov.br/web/secretaria_executiva_de_projetos_estrategicos/primeira_infancia/mae_paulistana");
+  };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -38,6 +43,8 @@ export default function GuidePart1() {
           </View>
           <Image source={require("../assets/images/salario.png")} style={styles.cardImg} />
         </View>
+
+        
 
         <View style={styles.card}>
           <View style={{ flex: 1 }}>

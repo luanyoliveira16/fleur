@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Header from "./Header"; 
+import Header from "../components/Header"; 
 
 export default function GuidePart2() {
   const router = useRouter();
