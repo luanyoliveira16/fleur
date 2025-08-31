@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import Header from './Header';
 
@@ -10,29 +10,66 @@ import iconComprimento from '../assets/images/ruler.png';
 import iconPeso from '../assets/images/weight.png';
 import iconInfo from '../assets/images/info.png';
 
+import { db } from '../services/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { GestacaoControleData } from '../services/gestacaoService';
+
 const imagensBebes = [babyImage1, babyImage2];
+
+const UID_GESTANTE = "gm8UTKShHYZnbAQWMS15dEIUtJG2";
 
 const ControleGestacional = () => {
     const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [controle, setControle] = useState<GestacaoControleData | null>(null);
 
-    const dataGestacao = "09 de dezembro";
-    const semanas = 21;
-    const dias = 3;
+    useEffect(() => {
+        const unsubscribe = onSnapshot(doc(db, 'gestacaoControle', UID_GESTANTE), (docSnap) => {
+            if (docSnap.exists()) {
+                setControle(docSnap.data() as GestacaoControleData);
+            } else {
+                setControle(null);
+            }
+            setLoading(false);
+        });
 
-    const bebes = [
-        { nome: "João", comprimento: 43, peso: 2 },
-        { nome: "João", comprimento: 43, peso: 2 },
-    ];
+        return () => unsubscribe();
+    }, []);
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#762C61" />
+            </View>
+        );
+    }
+
+    if (!controle) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Nenhum dado encontrado.</Text>
+            </View>
+        );
+    }
+
+    // separa idade gestacional em semanas e dias
+    let semanas = 0, dias = 0;
+    if (controle.idadeGestacionalConsulta) {
+        const match = controle.idadeGestacionalConsulta.match(/(\d+)\s*semanas?\s*e\s*(\d+)\s*dias?/);
+        if (match) {
+            semanas = Number(match[1]);
+            dias = Number(match[2]);
+        }
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: '#FFFAF8' }}>
             <Header />
-
             <ScrollView contentContainerStyle={styles.container}>
                 <Text style={styles.title}>Controle Gestacional</Text>
 
                 <Text style={[styles.subtitle, styles.alignLeft]}>
-                    {dataGestacao} – {semanas} semanas e {dias} dias
+                    {controle.dataConsulta || '---'} – {semanas || '---'} semanas e {dias || '---'} dias
                 </Text>
 
                 <Text style={[styles.sectionTitle, styles.alignLeft]}>
@@ -42,10 +79,10 @@ const ControleGestacional = () => {
                 <View
                     style={[
                         styles.babyImageContainer,
-                        bebes.length === 2 ? styles.babyImageTwo : styles.babyImageMultiple,
+                        controle.bebes?.length === 2 ? styles.babyImageTwo : styles.babyImageMultiple,
                     ]}
                 >
-                    {bebes.map((bebe, i) => (
+                    {controle.bebes?.map((bebe, i) => (
                         <View key={i} style={styles.babyCircle}>
                             <Image
                                 source={imagensBebes[i % imagensBebes.length]}
@@ -59,18 +96,20 @@ const ControleGestacional = () => {
                 <View
                     style={[
                         styles.cardsContainer,
-                        bebes.length === 2 ? styles.cardsTwo : null,
+                        controle.bebes?.length === 2 ? styles.cardsTwo : null,
                     ]}
                 >
-                    {bebes.map((bebe, index) => (
+                    {controle.bebes?.map((bebe, index) => (
                         <View key={index} style={styles.card}>
-                            <Text style={styles.cardTitle}>{bebe.nome}</Text>
+                            <Text style={styles.cardTitle}>{bebe.nome || "---"}</Text>
 
                             <View style={styles.infoRow}>
                                 <Image source={iconComprimento} style={styles.iconImage} />
                                 <Text style={styles.infoText}>
                                     Comprimento:{"\n"}
-                                    <Text style={styles.infoHighlight}>{bebe.comprimento} centímetros</Text>
+                                    <Text style={styles.infoHighlight}>
+                                        {bebe.comprimento ? `${bebe.comprimento} centímetros` : "---"}
+                                    </Text>
                                 </Text>
                             </View>
 
@@ -78,7 +117,9 @@ const ControleGestacional = () => {
                                 <Image source={iconPeso} style={styles.iconImage} />
                                 <Text style={styles.infoText}>
                                     Peso:{"\n"}
-                                    <Text style={styles.infoHighlight}>{bebe.peso} quilos</Text>
+                                    <Text style={styles.infoHighlight}>
+                                        {bebe.peso ? `${bebe.peso} quilos` : "---"}
+                                    </Text>
                                 </Text>
                             </View>
                         </View>
@@ -90,7 +131,7 @@ const ControleGestacional = () => {
                         <Image source={iconInfo} style={styles.iconImage} />
                         <Text style={styles.infoTextBold}>Informações adicionais:</Text>
                     </View>
-                    <Text style={styles.additionalText}>---</Text>
+                    <Text style={styles.additionalText}>{controle.observacoesConsulta || "---"}</Text>
                 </View>
 
                 <Text style={styles.warning}>
