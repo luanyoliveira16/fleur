@@ -8,6 +8,10 @@ export default function CadastrarGestante() {
   //const user = useAuthUser(); 
   const user = { uid: "cuyOx8xixbdoBjEsV6vQMu8qKk53" };
 
+  // Para pegar o usuário logado com Firebase Auth:
+  // import { useAuthUser } from '../hooks/useAuthUser';
+  // const user = useAuthUser();
+
   const [formData, setFormData] = useState({
     nomeCompleto: "",
     semanasGestacao: "",
