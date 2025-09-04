@@ -6,11 +6,6 @@ import Header from "../components/Header";
 export default function GuidePart1() {
   const router = useRouter();
 
-  const handleOpenMaePaulistanaLink = () => {
-    Linking.openURL("https://prefeitura.sp.gov.br/web/secretaria_executiva_de_projetos_estrategicos/primeira_infancia/mae_paulistana");
-  };
-
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
