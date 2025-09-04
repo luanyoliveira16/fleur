@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import Header from './Header';
+import Header from '../components/Header';
 
 import babyImage1 from '../assets/images/baby_left.png';
 import babyImage2 from '../assets/images/baby_right.png';
@@ -13,28 +13,40 @@ import iconInfo from '../assets/images/info.png';
 import { db } from '../services/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { GestacaoControleData } from '../services/gestacaoService';
-
+import { useAuthUser } from '../hooks/useAuthUser';
 const imagensBebes = [babyImage1, babyImage2];
-
-const UID_GESTANTE = "gm8UTKShHYZnbAQWMS15dEIUtJG2";
 
 const ControleGestacional = () => {
     const router = useRouter();
+    const user = useAuthUser();
     const [loading, setLoading] = useState(true);
     const [controle, setControle] = useState<GestacaoControleData | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(doc(db, 'gestacaoControle', UID_GESTANTE), (docSnap) => {
-            if (docSnap.exists()) {
-                setControle(docSnap.data() as GestacaoControleData);
-            } else {
-                setControle(null);
+        if (!user) return;
+
+        const unsubscribe = onSnapshot(
+            doc(db, 'gestacaoControle', user.uid),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    setControle(docSnap.data() as GestacaoControleData);
+                } else {
+                    setControle(null);
+                }
+                setLoading(false);
             }
-            setLoading(false);
-        });
+        );
 
         return () => unsubscribe();
-    }, []);
+    }, [user]);
+
+    if (!user) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Faça login para acessar seus dados.</Text>
+            </View>
+        );
+    }
 
     if (loading) {
         return (
@@ -48,11 +60,16 @@ const ControleGestacional = () => {
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <Text>Nenhum dado encontrado.</Text>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => router.push('/AtualizaControleGestacional')}
+                >
+                    <Text style={styles.buttonText}>Cadastrar agora</Text>
+                </TouchableOpacity>
             </View>
         );
     }
 
-    // separa idade gestacional em semanas e dias
     let semanas = 0, dias = 0;
     if (controle.idadeGestacionalConsulta) {
         const match = controle.idadeGestacionalConsulta.match(/(\d+)\s*semanas?\s*e\s*(\d+)\s*dias?/);
@@ -140,7 +157,7 @@ const ControleGestacional = () => {
 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => router.push('/(tabs)/AtualizaControleGestacional')}
+                    onPress={() => router.push('/AtualizaControleGestacional')}
                 >
                     <Text style={styles.buttonText}>Atualizar</Text>
                 </TouchableOpacity>
