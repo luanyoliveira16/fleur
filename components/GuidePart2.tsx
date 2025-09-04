@@ -8,12 +8,12 @@ export default function GuidePart2() {
   const router = useRouter();
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.logo}>Fleur</Text>
-      </View>
 
-      <View style={styles.content}>
+     <View style={styles.container}>
+      <Header /> {/* ✅ Usando o componente Header importado */}
+      <ScrollView>
+    
+      <View style={styles.content}> 
         <Text style={styles.title}>Guia da Gestante</Text>
         <Text style={styles.paragraph}>
           É importante conhecer seus direitos e saber o que é legalmente permitido durante a gestação.
@@ -45,6 +45,7 @@ export default function GuidePart2() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </View>
   );
 }
 

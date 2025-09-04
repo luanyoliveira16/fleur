@@ -7,7 +7,12 @@ export default function GuidePart1() {
   const router = useRouter();
 
   return (
-    
+
+
+     <View style={styles.container}>
+      <Header /> {/* ✅ Usando o componente Header importado */}
+      <ScrollView>
+
       <View style={styles.content}>
         <Text style={styles.title}>Guia da Gestante</Text>
         <Text style={styles.paragraph}>
@@ -56,6 +61,7 @@ export default function GuidePart1() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </View>
   );
 }
 
