@@ -39,7 +39,7 @@ export default function MentalHealth() {
         <View style={styles.content}>
           <Text style={styles.title}>Saúde Mental</Text>
           <Text style={styles.paragraph}>
-            Cuidar da saúde mental durante a gestação e o puerpério é fundamental, pois esses períodos trazem mudanças físicas, emocionais e hormonais que podem impactar significativamente o bem-estar da mulher. Manter a mente saudável ajuda a lidar com ansiedade, estresse e inseguranças comuns, promovendo um vínculo mais positivo com o bebê e maior qualidade de vida.
+            Cuidar da saúde mental durante a gestação e o puerpério é fundamental, pois esses períodos trazem mudanças físicas, emocionais e hormonais que podem impactar significativamente o bem-estar da mulher. Manter a mente saudável ajuda a lidar com ansiedade, estresse e inseguranças comuns, promovendo um vínculo mais positivo com o bebê e maior qualidade de vida .
           </Text>
           <Text style={styles.highlight}>
             Confira algumas informações sobre o puerpério e dicas para cuidar da sua saúde mental:
