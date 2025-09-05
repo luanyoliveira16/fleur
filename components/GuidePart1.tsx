@@ -61,6 +61,7 @@ export default function GuidePart1() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    <Text>...</Text>
     </View>
   );
 }
