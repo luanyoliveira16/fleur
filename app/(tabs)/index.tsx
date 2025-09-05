@@ -1,6 +1,6 @@
 import React from 'react';
-import ControleGestacional from '../../components/ControleGestacional';
+import Login from '../login'; // ajusta o caminho se necessário
 
-export default function ControleGestacionalScreen() {
-    return <ControleGestacional />;
+export default function Index() {
+    return <Login />;
 }
