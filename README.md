@@ -22,9 +22,10 @@ O **FleurApp** oferece recursos de acompanhamento da gestação, bem como funcio
 ---
 
 ## 🛠️ Tecnologias Utilizadas
-- ⚛️ **React** – Framework principal para construção da aplicação.  
-- 📱 **Expo Go** – Ferramenta para rodar e testar o app em dispositivos móveis.  
-- 🎨 **Figma** – Criação do design e protótipos de alta fidelidade.  
+- **React** – Framework principal para construção da aplicação.  
+- **Expo Go** – Ferramenta para rodar e testar o app em dispositivos móveis.  
+- **Figma** – Criação do design e protótipos de alta fidelidade.  
+- **Firebase** – Para o banco de dados e BE.
 
 ---
 
