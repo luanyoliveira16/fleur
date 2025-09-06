@@ -3,6 +3,8 @@
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-000000?style=for-the-badge&logo=expo&logoColor=white)
 ![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+
 
 ## 📖 Sobre o Projeto
 Este é o projeto final desenvolvido para a faculdade, com o objetivo de criar um **aplicativo multiplataforma** (Android e iOS) voltado para o **acompanhamento gestacional**, com foco especial no **bem-estar e saúde mental das gestantes**.  
