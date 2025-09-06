@@ -1,50 +1,50 @@
-# Welcome to your Expo app 👋
+# 🌸 FleurApp – Acompanhamento Gestacional
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Expo](https://img.shields.io/badge/Expo-000000?style=for-the-badge&logo=expo&logoColor=white)
+![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
 
-## Get started
+## 📖 Sobre o Projeto
+Este é o projeto final desenvolvido para a faculdade, com o objetivo de criar um **aplicativo multiplataforma** (Android e iOS) voltado para o **acompanhamento gestacional**, com foco especial no **bem-estar e saúde mental das gestantes**.  
 
-1. Install dependencies
+O **FleurApp** oferece recursos de acompanhamento da gestação, bem como funcionalidades que auxiliam a gestante a monitorar seu humor, sua rotina e se sentir mais acolhida durante esse período.  
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 🎯 Objetivos
+- Criar uma aplicação funcional utilizando **React** e **Expo Go**.  
+- Proporcionar uma experiência intuitiva e acolhedora para gestantes.  
+- Implementar recursos visuais a partir de protótipos desenvolvidos no **Figma**.  
+- Garantir compatibilidade com **Android** e **iOS**.  
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tecnologias Utilizadas
+- ⚛️ **React** – Framework principal para construção da aplicação.  
+- 📱 **Expo Go** – Ferramenta para rodar e testar o app em dispositivos móveis.  
+- 🎨 **Figma** – Criação do design e protótipos de alta fidelidade.  
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🚀  Instalação
 
-## Get a fresh project
+### 🔧 Pré-requisitos
+- Node.js instalado  
+- Expo Go instalado no celular (disponível na [Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent) e [App Store](https://apps.apple.com/app/expo-go/id982107779))  
+- Git instalado  
 
-When you're ready, run:
-
+### 📥 Como Rodar o Projeto
 ```bash
-npm run reset-project
-```
+# Clone o repositório
+git clone https://github.com/usuario/fleurapp.git
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+# Inicie o servidor de desenvolvimento
+npx expo start
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+# Entre na pasta do projeto
+cd fleurapp
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+# Instale as dependências
+npm install
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
