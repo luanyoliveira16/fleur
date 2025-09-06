@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
 
@@ -54,3 +55,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+import Login from '../login'; // ajusta o caminho se necessário
+
+export default function Index() {
+    return <Login />;
+}
+
