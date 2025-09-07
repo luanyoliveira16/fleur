@@ -29,6 +29,7 @@ export default function CreateAccountScreen() {
 
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+
   const errorColor = '#ff3b30';
   const borderColor ='#DDDDDD';
 
@@ -38,20 +39,17 @@ export default function CreateAccountScreen() {
 
   const router = useRouter();
 
-  // Função atualizada para pegar UID e enviar para cadastrar-gestante
+  // FUNÇÃO ATUALIZADA: envia UID via query string
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      const uid = userCredential.user.uid; // <- pega UID do Firebase
+      const uid = userCredential.user.uid;
 
       Alert.alert('Conta criada com sucesso!');
 
-      // Redireciona para cadastrar-gestante com UID
-      router.push({
-        pathname: '/cadastrar-gestante',
-        params: { uid }
-      });
+      // envia UID para a tela cadastrar-gestante
+      router.push(`/cadastrar-gestante?uid=${uid}`);
     } catch (error) {
       console.error("Erro ao criar conta:", error);
       Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente mais tarde.');
@@ -174,7 +172,7 @@ export default function CreateAccountScreen() {
   );
 }
 
-// Seus estilos permanecem iguais
+// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -183,8 +181,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center'
   },
-  title: { marginBottom: 14, color: '#762C61', textAlign: 'center' },
-  subtitle: { fontSize: 14, textAlign: 'center', color: '#6D6D6D', marginBottom: 25 },
+  title: {
+    marginBottom: 14,
+    color: '#762C61',
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#6D6D6D',
+    marginBottom: 25,
+  },
   inputWrapper: {
     width: '100%',
     maxWidth: 400,
@@ -198,10 +205,10 @@ const styles = StyleSheet.create({
     paddingRight: 44,
     backgroundColor: '#FFFFFF',
     ...Platform.select({
-      ios: { shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4 },
-      android: { elevation: 2 },
+        ios: { shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4 },
+        android: { elevation: 2 },
     }),
-  },
+  }, 
   input: { flex: 1, height: 48, color: '#762C61' },
   iconRightTouchable: { position: 'absolute', right: 1, top: '20%', transform: [{ translateY: -11 }], padding: 4, zIndex: 1 },
   iconRight: { position: 'absolute', right: 14 },
@@ -210,3 +217,5 @@ const styles = StyleSheet.create({
   buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '500' },
   logo: { width: 100, height: 80, marginBottom: 1 },
 });
+
+
