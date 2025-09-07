@@ -39,12 +39,20 @@ export default function CreateAccountScreen() {
 
   const router = useRouter(); // <-- initialize router
 
+  // FUNÇÃO ATUALIZADA PARA PEGAR UID E ENVIAR PARA CADASTRAR-GESTANTE
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const uid = userCredential.user.uid; // <- captura UID do Firebase
+
       Alert.alert('Conta criada com sucesso!');
-      router.push('/cadastrar-gestante'); 
+
+      // Envia UID para a tela cadastrar-gestante
+      router.push({
+        pathname: '/cadastrar-gestante',
+        params: { uid }
+      });
     } catch (error) {
       console.error("Erro ao criar conta:", error);
       Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente mais tarde.');
@@ -167,7 +175,7 @@ export default function CreateAccountScreen() {
   );
 }
 
-// ...seus estilos permanecem iguais
+// ... seus estilos permanecem iguais
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -212,5 +220,3 @@ const styles = StyleSheet.create({
   buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '500' },
   logo: { width: 100, height: 80, marginBottom: 1 },
 });
-
-
