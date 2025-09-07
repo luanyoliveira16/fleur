@@ -8,8 +8,8 @@ export default function InicioScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      // depois de 2 segundos vai para a Home (seu menu)
-      router.replace('/welcome');
+      
+      router.replace('/login');
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -18,7 +18,7 @@ export default function InicioScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/inicio.png')} 
+        source={require('../../assets/images/inicio.png')} 
         style={styles.logo}
         resizeMode="contain"
       />
