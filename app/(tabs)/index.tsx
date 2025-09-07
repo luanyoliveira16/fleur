@@ -1,28 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Link } from 'expo-router';
+import { Image, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
-export default function HomeScreen() {
+export default function InicioScreen() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // depois de 2 segundos vai para a Home (seu menu)
+      router.replace('/welcome');
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <View style={styles.menu}>
-  <Link href="/mental-health" asChild>
-    <TouchableOpacity style={styles.menuItem}>
-      <Text style={styles.menuText}>Saúde Mental</Text>
-    </TouchableOpacity>
-  </Link>
-
-  <Link href="/guide1" asChild>
-    <TouchableOpacity style={styles.menuItem}>
-      <Text style={styles.menuText}>Guia Parte 1</Text>
-    </TouchableOpacity>
-  </Link>
-
-  <Link href="/guide2" asChild>
-    <TouchableOpacity style={styles.menuItem}>
-      <Text style={styles.menuText}>Guia Parte 2</Text>
-    </TouchableOpacity>
-  </Link>
+    <View style={styles.container}>
+      <Image
+        source={require('../assets/images/inicio.png')} 
+        style={styles.logo}
+        resizeMode="contain"
+      />
     </View>
   );
 }
@@ -30,35 +29,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#762C61',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-  },
-  menu: {
-    width: '80%',
-    gap: 15,
-  },
-  menuItem: {
-    backgroundColor: '#5c1b54',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  menuText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  logo: { width: 400, height: 400, marginBottom: 24 },
 });
-
-import Login from '../login'; // ajusta o caminho se necessário
-
-export default function Index() {
-    return <Login />;
-}
-
