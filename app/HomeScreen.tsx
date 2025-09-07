@@ -1,5 +1,10 @@
 import { useState, useLayoutEffect, useEffect, useRef } from 'react';
 import { useRouter, useNavigation } from "expo-router";
+import { getGestante } from '../services/gestanteService';
+import { auth } from '../services/firebase';
+import { saveHumor } from '../services/humorService';
+import MenuFlutuante from '../components/MenuFlutuante';
+
 import {
   View, Text, Image, StyleSheet, Dimensions, ScrollView, TouchableOpacity,
   Linking, Animated
@@ -16,6 +21,10 @@ export default function HomeScreen() {
   const [humorSelecionado, setHumorSelecionado] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+
+  const [nomeGestante, setNomeGestante] = useState('');
+  const [nomesBebes, setNomesBebes] = useState<string[]>([]);
+  const [semanasGestacao, setSemanasGestacao] = useState<number>(0);
 
   useEffect(() => {
     Animated.timing(slideAnim, {
@@ -47,51 +56,42 @@ export default function HomeScreen() {
     });
   }, [navigation, toggleMenu]);
 
-  const menuItems = [
-    { label: "Calendário de Vacinas", external: true, url: "https://www.gov.br/saude/pt-br/vacinacao/calendario" },
-    { label: "Controle Gestacional", route: "/ControleGestacional" },
-    { label: "Plano de Parto", external: true, url: "https://www.despertardoparto.com.br/modelo-de-plano-de-parto.html" },
-    { label: "Saúde Mental", route: "/mental-health" },
-    { label: "Guia da Gestante", route: "/guide1" },
-    { label: "Configurações", route: "/configuracoes" },
-  ];
+  useEffect(() => {
+    const carregarDadosGestante = async () => {
+      const usuario = auth.currentUser;
+      if (!usuario) return;
+
+      const dados = await getGestante(usuario.uid);
+      if (dados) {
+        setNomeGestante(dados.nomeCompleto);
+        setNomesBebes(dados.nomesBebes || []);
+        setSemanasGestacao(dados.semanasGestacao);
+      }
+    };
+
+    carregarDadosGestante();
+  }, []);
+
+  const registrarHumor = async (emoji: string) => {
+    setHumorSelecionado(emoji);
+    const usuario = auth.currentUser;
+    if (!usuario) return;
+
+    const hoje = new Date().toISOString().split('T')[0];
+    await saveHumor({
+      uid: usuario.uid,
+      data: hoje,
+      humor: emoji,
+    });
+  };
 
   return (
     <View style={{ flex: 1 }}>
-      Menu Flutuante
-      <Animated.View style={[styles.menuContainer, { left: slideAnim }]}>
-        <TouchableOpacity onPress={toggleMenu} style={styles.closeButton}>
-          <Ionicons name="close" size={30} color="#fff" />
-        </TouchableOpacity>
+      <MenuFlutuante visible={menuVisible} toggleMenu={toggleMenu} slideAnim={slideAnim} />
 
-        <Text style={styles.menuTitle}>Menu</Text>
-
-        {menuItems.map((item, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.menuItem}
-            onPress={() => {
-              if (item.external && item.url) {
-                Linking.openURL(item.url);
-              } else if (item.route) {
-                router.push(item.route);
-              }
-              setMenuVisible(false);
-            }}
-          >
-            <Image
-              source={require("../assets/images/logoFleur.png")}
-              style={styles.icon}
-            />
-            <Text style={styles.menuText}>{item.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </Animated.View>
-
-      {/* Conteúdo principal com Scroll */}
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Home</Text>
-        <Text style={styles.subtitle}>Olá, Julia! Seja bem-vinda!</Text>
+        <Text style={styles.subtitle}>Olá, {nomeGestante}! Seja bem-vinda!</Text>
 
         <Image
           source={require('../assets/images/ultrassomGemelar.jpg')}
@@ -99,13 +99,13 @@ export default function HomeScreen() {
           resizeMode="cover"
         />
 
-        <Text style={styles.babyName}>João e Maria</Text>
-        <Text style={styles.weeks}>30 semanas</Text>
+        <Text style={styles.babyName}>{nomesBebes.join(' e ')}</Text>
+        <Text style={styles.weeks}>{semanasGestacao} semanas</Text>
 
         <Text style={styles.question}>Como está seu humor hoje?</Text>
         <View style={styles.emojis}>
           {['😀', '😊', '😐', '😢', '😠'].map((emoji, index) => (
-            <TouchableOpacity key={index} onPress={() => setHumorSelecionado(emoji)}>
+            <TouchableOpacity key={index} onPress={() => registrarHumor(emoji)}>
               <Text
                 style={{
                   fontSize: humorSelecionado === emoji ? 36 : 32,
