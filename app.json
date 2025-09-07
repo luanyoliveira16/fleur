@@ -14,7 +14,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logoFleur.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#762C61"
       },
       "edgeToEdgeEnabled": true
     },
@@ -29,8 +29,8 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/logoFleur.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#ffffff"
+          "resizeMode": "contain",
+          "backgroundColor": "#762C61"
         }
       ],
       "expo-font"
