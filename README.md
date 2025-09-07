@@ -39,15 +39,19 @@ O **FleurApp** oferece recursos de acompanhamento da gestação, bem como funcio
 ### 📥 Como Rodar o Projeto
 ```bash
 # Clone o repositório
-git clone https://github.com/usuario/fleurapp.git
-
-# Inicie o servidor de desenvolvimento
-npx expo start
-
+git clone https://github.com/luanyoliveira16/fleur.git
 
 # Entre na pasta do projeto
 cd fleurapp
 
 # Instale as dependências
 npm install
+npm i react-native-calendars
+npm i date-fns
+npms i date-fns@latest
+
+# Inicie o servidor de desenvolvimento
+npx expo start
+
+
 
