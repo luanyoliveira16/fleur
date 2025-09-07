@@ -46,7 +46,7 @@ const handleLogin = async (): Promise<void> => {
         await signInWithEmailAndPassword(auth, username, password);
         setLoading(false);
         Alert.alert('Sucesso', 'Login realizado com sucesso.');
-        router.push('/inicio');
+        router.push('/HomeScreen');
     } catch (error) {
         setLoading(false);
         setError('Usuário ou senha inválidos.');
