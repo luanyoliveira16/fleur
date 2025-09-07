@@ -12,7 +12,7 @@ const InicioScreen: React.FC = () => {
   
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/(tabs)/welcome');
+      router.replace('/login');
     }, 2000);
 
     return () => clearTimeout(timer); 
@@ -21,7 +21,7 @@ const InicioScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/Início.png')}
+        source={require('../assets/images/inicio.png')}
         style={styles.logo}
         resizeMode="contain"
       />
@@ -44,4 +44,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 });
+
+
+
 
