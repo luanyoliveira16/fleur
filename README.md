@@ -48,7 +48,7 @@ cd fleurapp
 npm install
 npm i react-native-calendars
 npm i date-fns
-npms i date-fns@latest
+npm i date-fns@latest
 
 # Inicie o servidor de desenvolvimento
 npx expo start
