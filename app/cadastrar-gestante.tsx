@@ -1,326 +1,223 @@
-import { FontAwesome } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { createGestante } from "../services/gestanteService";
+import React, { useState } from 'react';
+import { Image, Alert, Platform, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Controller, useForm } from 'react-hook-form';
+import * as yup from 'yup';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../services/firebase';
+import { useRouter } from 'expo-router'; // <-- import router
 
-type Params = {
-  uid: string;
-};
+// Validação
+const schema = yup.object({
+  email: yup.string().email('E-mail inválido').required('Campo obrigatório'),
+  password: yup.string().min(6, 'Mínimo 6 caracteres').required('Campo obrigatório'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Senhas não coincidem')
+    .required('Campo obrigatório'),
+});
 
-export default function CadastrarGestante() {
-  const router = useRouter();
-  const { uid } = useLocalSearchParams<Params>(); 
-
-  const [formData, setFormData] = useState({
-    nomeCompleto: "",
-    semanasGestacao: "",
-    tipoGestacao: "única",
-    dataParto: "",
-    condicoesSaude: "",
-    hospital: "",
+export default function CreateAccountScreen() {
+  const { control, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema),
   });
 
-  const [dataNascimento, setDataNascimento] = useState<Date | undefined>();
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-  const [dataParto, setDataParto] = useState<Date | undefined>();
-  const [showPartoPicker, setShowPartoPicker] = useState(false);
+  const errorColor = '#ff3b30';
+  const borderColor ='#DDDDDD';
 
-  const [bebes, setBebes] = useState(formData.tipoGestacao === "gemelar" ? ["", ""] : [""]);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    if (formData.tipoGestacao === "gemelar") {
-      setBebes(prev => (prev.length < 2 ? ["", ""] : prev));
-    } else {
-      setBebes([""]);
-    }
-  }, [formData.tipoGestacao]);
+  const router = useRouter(); // <-- initialize router
 
-  const handleChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleBebeChange = (index: number, value: string) => {
-    const novosBebes = [...bebes];
-    novosBebes[index] = value;
-    setBebes(novosBebes);
-  };
-
-  const adicionarBebe = () => {
-    setBebes([...bebes, ""]);
-  };
-
-  const handleSubmit = async () => {
-    if (!uid) {
-      Alert.alert("Erro", "UID do usuário não encontrado.");
-      return;
-    }
-
-    if (!formData.nomeCompleto || !dataNascimento || !formData.semanasGestacao) {
-      Alert.alert("Atenção", "Preencha todos os campos obrigatórios.");
-      return;
-    }
-
-    const semanas = Number(formData.semanasGestacao);
-    if (isNaN(semanas) || semanas <= 0) {
-      Alert.alert("Atenção", "Informe um número válido de semanas de gestação.");
-      return;
-    }
-
+  // FUNÇÃO ATUALIZADA PARA PEGAR UID E ENVIAR PARA CADASTRAR-GESTANTE
+  const onSubmit = async (data: any) => {
+    setLoading(true);
     try {
-      const tipoGestacaoLower = formData.tipoGestacao.toLowerCase() as "única" | "gemelar";
-      const nomesBebes =
-        tipoGestacaoLower === "gemelar" ? bebes.filter(b => b.trim() !== "") : [];
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const uid = userCredential.user.uid; // <- captura UID do Firebase
 
-      await createGestante(uid, {
-        nomeCompleto: formData.nomeCompleto,
-        dataNascimento: dataNascimento.toISOString(),
-        semanasGestacao: Number(formData.semanasGestacao),
-        tipoGestacao: tipoGestacaoLower,
-        nomesBebes,
-        condicoesSaude: formData.condicoesSaude,
-        hospital: formData.hospital,
-        dataPrevistaParto: formData.dataParto,
+      Alert.alert('Conta criada com sucesso!');
+
+      // Envia UID para a tela cadastrar-gestante
+      router.push({
+        pathname: '/cadastrar-gestante',
+        params: { uid }
       });
-
-      Alert.alert("Cadastro enviado!", "Dados salvos com sucesso!");
-
-      router.replace("/HomeScreen");
     } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Não foi possível salvar os dados.");
+      console.error("Erro ao criar conta:", error);
+      Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente mais tarde.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ThemedView style={styles.container}>
       <Image
-        source={require("../assets/images/logoFleur.png")}
-        style={styles.logoAbsolute}
+        source={require('../assets/images/icon_flor.jpg')}
+        style={styles.logo} 
+        resizeMode="contain" 
+      />
+      <ThemedText type="title" style={styles.title}>Criar conta</ThemedText>
+      <ThemedText type="default" style={styles.subtitle}>
+        Faça parte do Fleur! Uma comunidade de apoio à maternidade de gestantes num geral.{'\n'}
+        Aqui você vai ter muita troca, conhecimento e aconchego para você e sua rede de apoio.
+      </ThemedText>
+
+      {/* Campo E-mail */}
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, value } }) => (
+          <ThemedView style={styles.inputWrapper}>
+            <FontAwesome name="user-o" size={18} color="#762C61" style={styles.iconRight} />
+            <TextInput
+              placeholder="E-mail"
+              placeholderTextColor="#762C61"
+              style={[styles.input, { borderColor: errors.email ? errorColor : borderColor }]}
+              value={value}
+              onChangeText={onChange}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            {errors.email && (
+              <ThemedText style={{ color: errorColor, fontSize: 12, marginTop: 4 }}>
+                {errors.email.message}
+              </ThemedText>
+            )}
+          </ThemedView>
+        )}
       />
 
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Perfil da Gestante</Text>
-      </View>
-
-      {/* Nome completo */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>
-          Nome completo: <Text style={styles.required}>*</Text>
-        </Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Digite seu nome"
-          placeholderTextColor="#999"
-          value={formData.nomeCompleto}
-          onChangeText={text => handleChange("nomeCompleto", text)}
-        />
-      </View>
-
-      {/* Data de nascimento */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>
-          Data de nascimento: <Text style={styles.required}>*</Text>
-        </Text>
-        <TouchableOpacity
-          style={styles.dateInput}
-          onPress={() => setShowDatePicker(true)}
-        >
-          <Text style={{ color: dataNascimento ? "#333" : "#999" }}>
-            {dataNascimento ? dataNascimento.toLocaleDateString() : "DD/MM/AAAA"}
-          </Text>
-          <FontAwesome
-            name="calendar"
-            size={24}
-            color="#762c61"
-            style={{ marginLeft: 8 }}
-          />
-        </TouchableOpacity>
-
-        <DateTimePickerModal
-          isVisible={showDatePicker}
-          mode="date"
-          maximumDate={new Date()}
-          date={dataNascimento || new Date()}
-          onConfirm={date => {
-            setDataNascimento(date);
-            setShowDatePicker(false);
-          }}
-          onCancel={() => setShowDatePicker(false)}
-        />
-      </View>
-
-      {/* Semanas de gestação */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>Semanas de gestação: <Text style={styles.required}>*</Text></Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex.: 20"
-          placeholderTextColor="#999"
-          keyboardType="numeric"
-          value={formData.semanasGestacao}
-          onChangeText={(text) => handleChange("semanasGestacao", text)}
-        />
-      </View>
-
-      {/* Tipo de gestação */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>Tipo de gestação: <Text style={styles.required}>*</Text></Text>
-        <View style={styles.radioContainer}>
-          <TouchableOpacity style={styles.radioOption} onPress={() => handleChange("tipoGestacao", "única")}>
-            <View style={[styles.radioCircle, formData.tipoGestacao === "única" && styles.radioSelected]} />
-            <Text style={styles.radioLabel}>Única</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.radioOption} onPress={() => handleChange("tipoGestacao", "gemelar")}>
-            <View style={[styles.radioCircle, formData.tipoGestacao === "gemelar" && styles.radioSelected]} />
-            <Text style={styles.radioLabel}>Gemelar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Nomes dos bebês */}
-      {(formData.tipoGestacao === "gemelar" || formData.tipoGestacao === "única") && (
-        <View style={{ marginBottom: 15 }}>
-          <Text style={[styles.label, { marginBottom: 5 }]}>
-            {formData.tipoGestacao === "gemelar" ? "Nome dos bebês:" : "Nome do bebê:"}
-          </Text>
-
-          {bebes.map((bebe, index) => {
-            const placeholderText =
-              formData.tipoGestacao === "única" ? "Nome do bebê" : `Bebê ${index + 1}`;
-
-            return (
-              <TextInput
-                key={index}
-                style={styles.input}
-                placeholder={placeholderText}
-                placeholderTextColor="#999"
-                value={bebe}
-                onChangeText={(text) => handleBebeChange(index, text)}
+      {/* Campo Senha */}
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, value } }) => (
+          <ThemedView style={styles.inputWrapper}>
+            <TextInput
+              placeholder="Senha"
+              placeholderTextColor="#762C61"
+              style={[styles.input, { borderColor: errors.password ? errorColor : borderColor }]}
+              secureTextEntry={!showPassword}
+              value={value}
+              onChangeText={onChange}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.iconRightTouchable}>
+              <MaterialIcons
+                name={showConfirmPassword ? 'visibility-off' : 'visibility'}
+                size={22}
+                color="#762C61"
+                style={styles.iconRight}
               />
-            );
-          })}
-
-          {formData.tipoGestacao === "gemelar" && (
-            <TouchableOpacity style={styles.addButton} onPress={adicionarBebe}>
-              <Text style={styles.addButtonText}>+ Adicionar outro bebê</Text>
             </TouchableOpacity>
-          )}
-        </View>
-      )}
+            {errors.password && (
+              <ThemedText style={{ color: errorColor, fontSize: 12, marginTop: 4 }}>
+                {errors.password.message}
+              </ThemedText>
+            )}
+          </ThemedView>
+        )}
+      />
 
-      {/* Data prevista para o parto */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>Data prevista para o parto:</Text>
-        <TouchableOpacity style={styles.dateInput} onPress={() => setShowPartoPicker(true)}>
-          <Text style={{ color: dataParto ? "#333" : "#999" }}>
-            {dataParto ? dataParto.toLocaleDateString() : "DD/MM/AAAA"}
-          </Text>
-          <FontAwesome name="calendar" size={24} color="#762c61" style={{ marginLeft: 8 }} />
-        </TouchableOpacity>
+      {/* Campo Confirmar Senha */}
+      <Controller
+        control={control}
+        name="confirmPassword"
+        render={({ field: { onChange, value } }) => (
+          <ThemedView style={styles.inputWrapper}>
+            <TextInput
+              placeholder="Confirmar Senha"
+              placeholderTextColor="#762C61"
+              style={[styles.input, { borderColor: errors.confirmPassword ? errorColor : borderColor }]}
+              secureTextEntry={!showConfirmPassword}
+              value={value}
+              onChangeText={onChange}
+            />
+            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.iconRightTouchable}>
+              <MaterialIcons
+                name={showPassword ? 'visibility-off' : 'visibility'}
+                size={22}
+                color="#762C61"
+                style={styles.iconRight}
+              />
+            </TouchableOpacity>
+            {errors.confirmPassword && (
+              <ThemedText style={{ color: errorColor, fontSize: 12, marginTop: 4 }}>
+                {errors.confirmPassword.message}
+              </ThemedText>
+            )}
+          </ThemedView>
+        )}
+      />
 
-        <DateTimePickerModal
-          isVisible={showPartoPicker}
-          mode="date"
-          minimumDate={new Date()}
-          date={dataParto || new Date()}
-          onConfirm={(date) => { 
-            setDataParto(date); 
-            setFormData({ ...formData, dataParto: date.toISOString() }); 
-            setShowPartoPicker(false); 
-          }}
-          onCancel={() => setShowPartoPicker(false)}
-        />
-      </View>
-
-      {/* Condições de saúde */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>Condições de saúde relevantes:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Ex.: diabetes gestacional, hipertensão..."
-          placeholderTextColor="#999"
-          value={formData.condicoesSaude}
-          onChangeText={(text) => handleChange("condicoesSaude", text)}
-        />
-      </View>
-
-      {/* Hospital */}
-      <View style={styles.inputField}>
-        <Text style={styles.label}>Hospital:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Maternidade escolhida/desejada"
-          placeholderTextColor="#999"
-          value={formData.hospital}
-          onChangeText={(text) => handleChange("hospital", text)}
-        />
-      </View>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Cadastrar</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      {/* Botão */}
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleSubmit(onSubmit)}
+        disabled={loading}
+      >
+        <ThemedText style={styles.buttonText}>
+          {loading ? 'Criando...' : 'Próximo'}
+        </ThemedText>
+      </TouchableOpacity>
+    </ThemedView>
   );
 }
 
+// ... seus estilos permanecem iguais
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    padding: 40,
-    paddingTop: 100,
-    paddingBottom: 80,
-    backgroundColor: "#fffaf8",
-    justifyContent: "flex-start",
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  titleContainer: { marginBottom: 30 },
-  title: { fontSize: 24, fontWeight: "bold", color: "#762c61", paddingLeft: 30 },
-  logoAbsolute: { width: 80, height: 90, resizeMode: "contain", position: "absolute", top: 70, right: 10 },
-  inputField: { marginBottom: 15 },
-  label: { fontSize: 16, color: "#762c61", marginBottom: 5 },
-  required: { color: "#ff0000" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#d8c4ce",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: "#333",
-    backgroundColor: "transparent",
-    marginBottom: 8,
+  title: {
+    marginBottom: 14,
+    color: '#762C61',
+    textAlign: 'center',
   },
-  dateInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#d8c4ce",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 8,
-    justifyContent: "space-between",
+  subtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#6D6D6D',
+    marginBottom: 25,
   },
-  buttonContainer: { alignItems: "center", marginTop: 20, marginBottom: 20 },
-  button: { borderRadius: 8, backgroundColor: "#762c61", paddingVertical: 12, paddingHorizontal: 30 },
-  buttonText: { color: "#f8f4f0", fontWeight: "bold", fontSize: 16 },
-  radioContainer: { flexDirection: "row", gap: 20 },
-  radioOption: { flexDirection: "row", alignItems: "center", marginRight: 20 },
-  radioCircle: {
-    height: 20,
-    width: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  radioSelected: { backgroundColor: "#000" },
-  radioLabel: { fontSize: 16, color: "#000" },
-  addButton: { marginTop: 5, marginBottom: 15, alignSelf: "flex-end" },
-  addButtonText: { color: "#a0a0a0", fontWeight: "bold" },
+  inputWrapper: {
+    width: '100%',
+    maxWidth: 400,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderRadius: 24,
+    borderColor: '#DDDDDD',
+    paddingLeft: 44,
+    paddingRight: 44,
+    backgroundColor: '#FFFFFF',
+    ...Platform.select({
+        ios: { shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4 },
+        android: { elevation: 2 },
+    }),
+  }, 
+  input: { flex: 1, height: 48, color: '#762C61' },
+  iconRightTouchable: { position: 'absolute', right: 1, top: '20%', transform: [{ translateY: -11 }], padding: 4, zIndex: 1 },
+  iconRight: { position: 'absolute', right: 14 },
+  button: { backgroundColor: '#762C61', paddingVertical: 10, paddingHorizontal: 45, borderRadius: 12, marginBottom: 8, alignItems: 'center', alignSelf: 'center' },
+  buttonDisabled: { backgroundColor: '#AA86A8' },
+  buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '500' },
+  logo: { width: 100, height: 80, marginBottom: 1 },
 });
+
