@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, Alert, Platform, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Image, Alert, Platform, StyleSheet, View, TextInput, TouchableOpacity } from 'react-native';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Controller, useForm } from 'react-hook-form';
 import * as yup from 'yup';
@@ -75,8 +75,7 @@ router.push({ pathname: '/cadastrarGestante', params: { uid } });
         control={control}
         name="email"
         render={({ field: { onChange, value } }) => (
-          <ThemedView style={styles.inputWrapper}>
-            <FontAwesome name="user-o" size={18} color="#762C61" style={styles.iconRight} />
+          <View style={styles.inputWrapper}>
             <TextInput
               placeholder="E-mail"
               placeholderTextColor="#762C61"
@@ -85,11 +84,13 @@ router.push({ pathname: '/cadastrarGestante', params: { uid } });
               onChangeText={onChange}
               keyboardType="email-address"
               autoCapitalize="none"
+              textAlignVertical="center"
             />
-          </ThemedView>
+            <FontAwesome name="user-o" size={22} color="#762C61" />
+          </View>
         )}
       />
-      {errors.email && <ThemedText style={styles.errorText}>{errors.email.message}</ThemedText>}
+      {errors.email && (<ThemedText style={styles.errorText}>{errors.email.message}</ThemedText>)}
 
       {/* Campo Senha */}
       <Controller
@@ -194,15 +195,19 @@ const styles = StyleSheet.create({
       android: { elevation: 2 },
     }),
   },
-  input: { flex: 1, height: 48, color: '#762C61' },
+  input: { flex: 1, height: 48, color: '#762C61', marginRight: 12, },
   iconRightTouchable: { position: 'absolute', right: 14, padding: 4, zIndex: 1 },
-  iconRight: { position: 'absolute', left: 14 },
+
   button: { backgroundColor: '#762C61', paddingVertical: 10, paddingHorizontal: 45, borderRadius: 12, marginTop: 20 },
   buttonDisabled: { backgroundColor: '#AA86A8' },
   buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '500' },
   logo: { width: 100, height: 80, marginBottom: 10 },
   errorText: { color: '#ff3b30', fontSize: 12, marginBottom: 8 },
 });
+
+
+
+
 
 
 
