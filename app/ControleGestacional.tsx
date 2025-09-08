@@ -1,7 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Image,
+    ActivityIndicator,
+    Animated,
+    Dimensions
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import Header from '../components/Header';
+import MenuFlutuante from "../components/MenuFlutuante";
 
 import babyImage1 from '../assets/images/baby_left.png';
 import babyImage2 from '../assets/images/baby_right.png';
@@ -18,202 +29,221 @@ import { useAuthUser } from '../hooks/useAuthUser';
 const imagensBebes = [babyImage1, babyImage2];
 
 const ControleGestacional = () => {
-  const router = useRouter();
-  const user = useAuthUser();
-  const [loading, setLoading] = useState(true);
-  const [controle, setControle] = useState<GestacaoControleData | null>(null);
+    const router = useRouter();
+    const user = useAuthUser();
+    const [menuVisible, setMenuVisible] = useState(false);
+    const screenWidth = Dimensions.get("window").width;
+    const slideAnim = useRef(new Animated.Value(-screenWidth * 0.8)).current;
+    const [loading, setLoading] = useState(true);
+    const [controle, setControle] = useState<GestacaoControleData>({
+        dataConsulta: '',
+        idadeGestacionalConsulta: '',
+        bebes: [{ nome: 'Bebê', peso: null, comprimento: null }],
+        observacoesConsulta: '',
+    });
 
-  useEffect(() => {
-    if (!user) return;
-
-    const unsubscribe = onSnapshot(
-        doc(db, 'gestacaoControle', user.uid),
-        (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data() as GestacaoControleData;
-
-            setControle((prev) => ({
-              dataConsulta: data.dataConsulta?.trim() || prev?.dataConsulta || '',
-              idadeGestacionalConsulta: data.idadeGestacionalConsulta?.trim() || prev?.idadeGestacionalConsulta || '',
-              bebes: data.bebes && data.bebes.length > 0
-                  ? data.bebes.map((bebe, i) => ({
-                    nome: bebe.nome?.trim() || prev?.bebes?.[i]?.nome || 'Bebê',
-                    peso: bebe.peso || prev?.bebes?.[i]?.peso || null,
-                    comprimento: bebe.comprimento || prev?.bebes?.[i]?.comprimento || null,
-                  }))
-                  : prev?.bebes || [{ nome: 'Bebê', peso: null, comprimento: null }],
-              observacoesConsulta: data.observacoesConsulta?.trim() || prev?.observacoesConsulta || '',
-            }));
-
-          }
-          setLoading(false);
+    const toggleMenu = () => {
+        if (menuVisible) {
+            Animated.timing(slideAnim, {
+                toValue: -screenWidth * 0.8,
+                duration: 300,
+                useNativeDriver: false,
+            }).start(() => setMenuVisible(false));
+        } else {
+            setMenuVisible(true);
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: false,
+            }).start();
         }
-    );
+    };
 
-    return () => unsubscribe();
-  }, [user]);
+    useEffect(() => {
+        if (!user) return;
 
-  if (!user) {
-    return (
-        <View style={styles.centered}>
-          <Text>Faça login para acessar seus dados.</Text>
-        </View>
-    );
-  }
+        const unsubscribe = onSnapshot(
+            doc(db, 'gestacaoControle', user.uid),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data() as GestacaoControleData;
 
-  if (loading) {
-    return (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#762C61" />
-        </View>
-    );
-  }
-
-  if (!controle) {
-    return (
-        <View style={styles.centered}>
-          <Text>Nenhum dado encontrado.</Text>
-          <TouchableOpacity
-              style={styles.button}
-              onPress={() => router.push('/AtualizaControleGestacional')}
-          >
-            <Text style={styles.buttonText}>Cadastrar agora</Text>
-          </TouchableOpacity>
-        </View>
-    );
-  }
-
-  let semanas = 0, dias = 0;
-  if (controle.idadeGestacionalConsulta) {
-    const match = controle.idadeGestacionalConsulta.match(/(\d+)\s*semanas?\s*e\s*(\d+)\s*dias?/);
-    if (match) {
-      semanas = Number(match[1]);
-      dias = Number(match[2]);
-    } else {
-      const apenasSemanas = controle.idadeGestacionalConsulta.match(/(\d+)\s*semanas?/);
-      if (apenasSemanas) semanas = Number(apenasSemanas[1]);
-    }
-  }
-
-  const hoje = new Date();
-  const dataExibir = hoje.toLocaleDateString('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-  });
-
-
-
-  const bebês = controle.bebes || [{ nome: 'Bebê', peso: null, comprimento: null }];
-
-  return (
-      <View style={{ flex: 1, backgroundColor: '#FFFAF8' }}>
-        <Header />
-        <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.title}>Controle Gestacional</Text>
-
-          <Text style={[styles.subtitle, styles.alignLeft]}>
-            {dataExibir}
-            {(() => {
-              if (controle.idadeGestacionalConsulta) {
-                const raw = controle.idadeGestacionalConsulta.trim();
-
-                const match = raw.match(/(\d+)\s*semanas?.*?(\d+)\s*dias?/i);
-                const matchSemanas = raw.match(/(\d+)\s*semanas?/i);
-                const matchDias = raw.match(/(\d+)\s*dias?/i);
-                const apenasNumero = raw.match(/^\d+$/);
-
-                if (match) {
-                  return ` – ${match[1]} semanas e ${match[2]} dias`;
-                } else if (matchSemanas) {
-                  return ` – ${matchSemanas[1]} semanas`;
-                } else if (matchDias) {
-                  return ` – ${matchDias[1]} dias`;
-                } else if (apenasNumero) {
-                  return ` – ${apenasNumero[0]} semanas`;
-                } else {
-                  return ` – ${raw}`; // fallback
+                    setControle({
+                        dataConsulta: data.dataConsulta?.trim() || '',
+                        idadeGestacionalConsulta: data.idadeGestacionalConsulta?.trim() || '',
+                        bebes: data.bebes && data.bebes.length > 0
+                            ? data.bebes.map((bebe) => ({
+                                nome: bebe.nome?.trim() || 'Bebê',
+                                peso: bebe.peso || null,
+                                comprimento: bebe.comprimento || null,
+                            }))
+                            : [{ nome: 'Bebê', peso: null, comprimento: null }],
+                        observacoesConsulta: data.observacoesConsulta?.trim() || '',
+                    });
                 }
-              } else if (semanas || dias) {
-                return ` – ${semanas ? `${semanas} semanas` : ''}${dias ? ` e ${dias} dias` : ''}`;
-              }
-              return '';
-            })()}
-          </Text>
+                setLoading(false);
+            }
+        );
 
+        return () => unsubscribe();
+    }, [user]);
 
-          <Text style={[styles.sectionTitle, styles.alignLeft]}>Seus bebês nesta semana:</Text>
-
-          <View
-              style={[
-                styles.babyImageContainer,
-                bebês.length === 2 ? styles.babyImageTwo : styles.babyImageMultiple,
-              ]}
-          >
-            {bebês.map((bebe, i) => (
-                <View key={i} style={styles.babyCircle}>
-                  <Image
-                      source={imagensBebes[i % imagensBebes.length]}
-                      style={styles.babyImage}
-                      resizeMode="cover"
-                  />
-                </View>
-            ))}
-          </View>
-
-          <View
-              style={[
-                styles.cardsContainer,
-                bebês.length === 2 ? styles.cardsTwo : null,
-              ]}
-          >
-            {bebês.map((bebe, index) => (
-                <View key={index} style={styles.card}>
-                  <Text style={styles.cardTitle}>{bebe.nome || '---'}</Text>
-
-                  <View style={styles.infoRow}>
-                    <Image source={iconComprimento} style={styles.iconImage} />
-                    <Text style={styles.infoText}>
-                      Comprimento:{"\n"}
-                      <Text style={styles.infoHighlight}>
-                        {bebe.comprimento ? `${bebe.comprimento} cm` : '---'}
-                      </Text>
-                    </Text>
-                  </View>
-
-                  <View style={styles.infoRow}>
-                    <Image source={iconPeso} style={styles.iconImage} />
-                    <Text style={styles.infoText}>
-                      Peso:{"\n"}
-                      <Text style={styles.infoHighlight}>
-                        {bebe.peso ? `${bebe.peso} g` : '---'}
-                      </Text>
-                    </Text>
-                  </View>
-                </View>
-            ))}
-          </View>
-
-          <View style={styles.card}>
-            <View style={styles.infoRow}>
-              <Image source={iconInfo} style={styles.iconImage} />
-              <Text style={styles.infoTextBold}>Informações adicionais:</Text>
+    if (!user) {
+        return (
+            <View style={styles.centered}>
+                <Text>Faça login para acessar seus dados.</Text>
             </View>
-            <Text style={styles.additionalText}>{controle.observacoesConsulta || '---'}</Text>
-          </View>
+        );
+    }
 
-          <Text style={styles.warning}>
-            As medidas são aproximadas e podem variar dentro da faixa normal.
-          </Text>
+    if (loading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color="#762C61" />
+            </View>
+        );
+    }
 
-          <TouchableOpacity
-              style={styles.button}
-              onPress={() => router.push('/AtualizaControleGestacional')}
-          >
-            <Text style={styles.buttonText}>Atualizar</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-  );
+    // Processa idade gestacional
+    let semanas = 0, dias = 0;
+    if (controle.idadeGestacionalConsulta) {
+        const match = controle.idadeGestacionalConsulta.match(/(\d+)\s*semanas?\s*e\s*(\d+)\s*dias?/);
+        if (match) {
+            semanas = Number(match[1]);
+            dias = Number(match[2]);
+        } else {
+            const apenasSemanas = controle.idadeGestacionalConsulta.match(/(\d+)\s*semanas?/);
+            if (apenasSemanas) semanas = Number(apenasSemanas[1]);
+        }
+    }
+
+    const hoje = new Date();
+    const dataExibir = hoje.toLocaleDateString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+    });
+
+    const bebês = controle.bebes || [{ nome: 'Bebê', peso: null, comprimento: null }];
+
+    return (
+        <View style={{ flex: 1, backgroundColor: '#FFFAF8' }}>
+            <Header onMenuPress={toggleMenu}/>
+            <ScrollView contentContainerStyle={styles.container}>
+                <Text style={styles.title}>Controle Gestacional</Text>
+
+                <Text style={[styles.subtitle, styles.alignLeft]}>
+                    {dataExibir}
+                    {(() => {
+                        if (controle.idadeGestacionalConsulta) {
+                            const raw = controle.idadeGestacionalConsulta.trim();
+
+                            const match = raw.match(/(\d+)\s*semanas?.*?(\d+)\s*dias?/i);
+                            const matchSemanas = raw.match(/(\d+)\s*semanas?/i);
+                            const matchDias = raw.match(/(\d+)\s*dias?/i);
+                            const apenasNumero = raw.match(/^\d+$/);
+
+                            if (match) {
+                                return ` – ${match[1]} semanas e ${match[2]} dias`;
+                            } else if (matchSemanas) {
+                                return ` – ${matchSemanas[1]} semanas`;
+                            } else if (matchDias) {
+                                return ` – ${matchDias[1]} dias`;
+                            } else if (apenasNumero) {
+                                return ` – ${apenasNumero[0]} semanas`;
+                            } else {
+                                return ` – ${raw}`;
+                            }
+                        } else if (semanas || dias) {
+                            return ` – ${semanas ? `${semanas} semanas` : ''}${dias ? ` e ${dias} dias` : ''}`;
+                        }
+                        return '';
+                    })()}
+                </Text>
+
+                <Text style={[styles.sectionTitle, styles.alignLeft]}>Seus bebês nesta semana:</Text>
+
+                <View
+                    style={[
+                        styles.babyImageContainer,
+                        bebês.length === 2 ? styles.babyImageTwo : styles.babyImageMultiple,
+                    ]}
+                >
+                    {bebês.map((bebe, i) => (
+                        <View key={i} style={styles.babyCircle}>
+                            <Image
+                                source={imagensBebes[i % imagensBebes.length]}
+                                style={styles.babyImage}
+                                resizeMode="cover"
+                            />
+                        </View>
+                    ))}
+                </View>
+
+                <View
+                    style={[
+                        styles.cardsContainer,
+                        bebês.length === 2 ? styles.cardsTwo : null,
+                    ]}
+                >
+                    {bebês.map((bebe, index) => (
+                        <View key={index} style={styles.card}>
+                            <Text style={styles.cardTitle}>{bebe.nome || '---'}</Text>
+
+                            <View style={styles.infoRow}>
+                                <Image source={iconComprimento} style={styles.iconImage} />
+                                <Text style={styles.infoText}>
+                                    Comprimento:{"\n"}
+                                    <Text style={styles.infoHighlight}>
+                                        {bebe.comprimento ? `${bebe.comprimento} cm` : '---'}
+                                    </Text>
+                                </Text>
+                            </View>
+
+                            <View style={styles.infoRow}>
+                                <Image source={iconPeso} style={styles.iconImage} />
+                                <Text style={styles.infoText}>
+                                    Peso:{"\n"}
+                                    <Text style={styles.infoHighlight}>
+                                        {bebe.peso ? `${bebe.peso} g` : '---'}
+                                    </Text>
+                                </Text>
+                            </View>
+                        </View>
+                    ))}
+                </View>
+
+                <View style={styles.card}>
+                    <View style={styles.infoRow}>
+                        <Image source={iconInfo} style={styles.iconImage} />
+                        <Text style={styles.infoTextBold}>Informações adicionais:</Text>
+                    </View>
+                    <Text style={styles.additionalText}>{controle.observacoesConsulta || '---'}</Text>
+                </View>
+
+                <Text style={styles.warning}>
+                    As medidas são aproximadas e podem variar dentro da faixa normal.
+                </Text>
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => router.push('/AtualizaControleGestacional')}
+                >
+                    <Text style={styles.buttonText}>Atualizar</Text>
+                </TouchableOpacity>
+            </ScrollView>
+            <Text>...</Text>
+            {menuVisible && (
+                <MenuFlutuante
+                    visible={menuVisible}
+                    toggleMenu={toggleMenu}
+                    slideAnim={slideAnim}
+                />
+            )}
+        </View>
+    );
 };
+
+export default ControleGestacional;
+
 
 const styles = StyleSheet.create({
   container: {
