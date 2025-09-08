@@ -1,7 +1,17 @@
 import { useRouter } from "expo-router";
-import React from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useRef, useState } from "react";
+import {
+  Animated,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Header from "../components/Header";
+import MenuFlutuante from "../components/MenuFlutuante";
 
 const ICONS = [
   require("../assets/images/icon1.png"),
@@ -13,6 +23,27 @@ const ICONS = [
 ];
 
 export default function MentalHealth() {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const slideAnim = useRef(new Animated.Value(-screenWidth * 0.8)).current;
+
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth * 0.8,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
   const router = useRouter();
 
   const items = [
@@ -26,23 +57,28 @@ export default function MentalHealth() {
 
   return (
     <View style={styles.container}>
-      {/* HEADER NO TOPO - FIXO */}
-      <View style={styles.headerContainer}>
-        <Header />
-      </View>
+      {/* HEADER NO TOPO */}
+      <Header onMenuPress={toggleMenu} />
       
+
       {/* CONTEÚDO COM ESPAÇO RESERVADO */}
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.content}>
           <Text style={styles.title}>Saúde Mental</Text>
           <Text style={styles.paragraph}>
-            Cuidar da saúde mental durante a gestação e o puerpério é fundamental, pois esses períodos trazem mudanças físicas, emocionais e hormonais que podem impactar significativamente o bem-estar da mulher. Manter a mente saudável ajuda a lidar com ansiedade, estresse e inseguranças comuns, promovendo um vínculo mais positivo com o bebê e maior qualidade de vida .
+            Cuidar da saúde mental durante a gestação e o puerpério é
+            fundamental, pois esses períodos trazem mudanças físicas, emocionais
+            e hormonais que podem impactar significativamente o bem-estar da
+            mulher. Manter a mente saudável ajuda a lidar com ansiedade,
+            estresse e inseguranças comuns, promovendo um vínculo mais positivo
+            com o bebê e maior qualidade de vida .
           </Text>
           <Text style={styles.highlight}>
-            Confira algumas informações sobre o puerpério e dicas para cuidar da sua saúde mental:
+            Confira algumas informações sobre o puerpério e dicas para cuidar da
+            sua saúde mental:
           </Text>
 
           <View style={styles.grid}>
@@ -59,22 +95,29 @@ export default function MentalHealth() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      {menuVisible && (
+        <MenuFlutuante
+          visible={menuVisible}
+          toggleMenu={toggleMenu}
+          slideAnim={slideAnim}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#fdfdfd" 
+  container: {
+    flex: 1,
+    backgroundColor: "#fdfdfd",
   },
   headerContainer: {
-    width: '100%',
-    backgroundColor: '#762C61',
-    height: 60, 
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
+    width: "100%",
+    backgroundColor: "#762C61",
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -83,39 +126,38 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    // ⬇️ ESPAÇO RESERVADO PARA O HEADER ⬇️
-    paddingTop: 60, // MESMA ALTURA DO HEADER
+    paddingTop: 8,
   },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 20,
   },
-  content: { 
+  content: {
     padding: 16,
     paddingTop: 0,
   },
-  title: { 
-    fontSize: 20, 
-    fontWeight: "600", 
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
     marginBottom: 12,
     marginTop: 0,
   },
-  paragraph: { 
+  paragraph: {
     color: "#444",
     marginBottom: 8,
     lineHeight: 20,
   },
-  highlight: { 
+  highlight: {
     marginTop: 12,
-    color: "#5c1b54", 
+    color: "#5c1b54",
     fontWeight: "600",
     marginBottom: 16,
   },
-  grid: { 
-    flexDirection: "row", 
-    flexWrap: "wrap", 
-    justifyContent: "space-between", 
-    marginTop: 16 
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    // marginTop: 6,
   },
   card: {
     width: "48%",
@@ -127,21 +169,21 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     alignItems: "center",
   },
-  icon: { 
-    width: 40, 
-    height: 40, 
-    marginBottom: 8, 
+  icon: {
+    width: 40,
+    height: 40,
+    marginBottom: 8,
   },
-  cardText: { 
-    textAlign: "center", 
-    fontSize: 12, 
+  cardText: {
+    textAlign: "center",
+    fontSize: 12,
     color: "#333",
-    fontWeight: '500',
+    fontWeight: "500",
   },
-  nextLink: { 
-    color: "#5c1b54", 
-    marginTop: 16, 
-    fontWeight: "500", 
-    textAlign: "right" 
+  nextLink: {
+    color: "#5c1b54",
+    marginTop: 16,
+    fontWeight: "500",
+    textAlign: "right",
   },
 });

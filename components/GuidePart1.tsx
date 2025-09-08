@@ -1,16 +1,36 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from "react-native";
+import React, { useRef, useState } from "react";
+import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView, Dimensions, Animated } from "react-native";
 import { useRouter } from "expo-router";
 import Header from "../components/Header"; 
+import MenuFlutuante from "../components/MenuFlutuante";
 
 export default function GuidePart1() {
   const router = useRouter();
+  const [menuVisible, setMenuVisible] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const slideAnim = useRef(new Animated.Value(-screenWidth * 0.8)).current;
+  
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth * 0.8,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
 
   return (
 
-
      <View style={styles.container}>
-      <Header /> {/* ✅ Usando o componente Header importado */}
+      <Header onMenuPress={toggleMenu}/> {/* ✅ Usando o componente Header importado */}
       <ScrollView>
 
       <View style={styles.content}>
@@ -62,6 +82,13 @@ export default function GuidePart1() {
       </View>
     </ScrollView>
     <Text>...</Text>
+    {menuVisible && (
+      <MenuFlutuante
+        visible={menuVisible}
+        toggleMenu={toggleMenu}
+        slideAnim={slideAnim}
+      />
+    )}
     </View>
   );
 }
