@@ -1,28 +1,25 @@
-import { useState, useLayoutEffect, useEffect, useRef } from 'react';
-import { useRouter, useNavigation } from "expo-router";
-import { getGestante } from '../services/gestanteService';
-import { auth } from '../services/firebase';
-import { saveHumor } from '../services/humorService';
-import MenuFlutuante from '../components/MenuFlutuante';
-
-import {
-  View, Text, Image, StyleSheet, Dimensions, ScrollView, TouchableOpacity,
-  Linking, Animated
-} from 'react-native';
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "expo-router";
+import { getGestante } from "../services/gestanteService";
+import { auth } from "../services/firebase";
+import { saveHumor } from "../services/humorService";
+import MenuFlutuante from "../components/MenuFlutuante";
+import Header from "../components/Header"; 
+import {  View, Text, Image, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Linking, Animated } from 'react-native';
 import { colors } from "../constants/colorApp";
-import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen() {
   const router = useRouter();
-  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const [humorSelecionado, setHumorSelecionado] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
 
-  const [nomeGestante, setNomeGestante] = useState('');
+  const [nomeGestante, setNomeGestante] = useState("");
   const [nomesBebes, setNomesBebes] = useState<string[]>([]);
   const [semanasGestacao, setSemanasGestacao] = useState<number>(0);
 
@@ -34,27 +31,7 @@ export default function HomeScreen() {
     }).start();
   }, [menuVisible]);
 
-  const toggleMenu = () => setMenuVisible(prev => !prev);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: true,
-      headerTitle: () => (
-        <Image
-          source={require('@/assets/images/logotipo.png')}
-          style={{ width: 130, height: 32 }}
-        />
-      ),
-      headerStyle: { backgroundColor: '#762C61' },
-      headerTitleAlign: 'center',
-      headerTintColor: '#fff',
-      headerLeft: () => (
-        <TouchableOpacity onPress={toggleMenu} style={{ marginLeft: 15 }}>
-          <Ionicons name="menu" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation, toggleMenu]);
+  const toggleMenu = () => setMenuVisible((prev) => !prev);
 
   useEffect(() => {
     const carregarDadosGestante = async () => {
@@ -77,7 +54,7 @@ export default function HomeScreen() {
     const usuario = auth.currentUser;
     if (!usuario) return;
 
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = new Date().toISOString().split("T")[0];
     await saveHumor({
       uid: usuario.uid,
       data: hoje,
@@ -86,30 +63,44 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <MenuFlutuante visible={menuVisible} toggleMenu={toggleMenu} slideAnim={slideAnim} />
+    <View style={{ flex: 1, backgroundColor: colors.backgroundTela }}>
+      {/* Header igual às outras telas */}
+      <Header onMenuPress={toggleMenu} />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      {/* Menu lateral */}
+      <MenuFlutuante
+        visible={menuVisible}
+        toggleMenu={toggleMenu}
+        slideAnim={slideAnim}
+      />
+
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { paddingBottom: 24 + insets.bottom },
+        ]}
+      >
         <Text style={styles.title}>Home</Text>
         <Text style={styles.subtitle}>Olá, {nomeGestante}! Seja bem-vinda!</Text>
 
         <Image
-          source={require('../assets/images/ultrassomGemelar.jpg')}
+          source={require("../assets/images/ultrassomGemelar.jpg")}
           style={styles.ultrassom}
           resizeMode="cover"
         />
 
-        <Text style={styles.babyName}>{nomesBebes.join(' e ')}</Text>
+        <Text style={styles.babyName}>{nomesBebes.join(" e ")}</Text>
         <Text style={styles.weeks}>{semanasGestacao} semanas</Text>
 
         <Text style={styles.question}>Como está seu humor hoje?</Text>
         <View style={styles.emojis}>
-          {['😀', '😊', '😐', '😢', '😠'].map((emoji, index) => (
+          {["😀", "😊", "😐", "😢", "😠"].map((emoji, index) => (
             <TouchableOpacity key={index} onPress={() => registrarHumor(emoji)}>
               <Text
                 style={{
                   fontSize: humorSelecionado === emoji ? 36 : 32,
-                  color: humorSelecionado === emoji ? colors.purple : colors.gray[500],
+                  color:
+                    humorSelecionado === emoji ? colors.purple : colors.gray[500],
                   transform: [{ scale: humorSelecionado === emoji ? 1.1 : 1 }],
                 }}
               >
@@ -122,9 +113,15 @@ export default function HomeScreen() {
         <Text style={styles.infoTitle}>Confira informações importantes:</Text>
 
         <View style={styles.cardContainer}>
-          <TouchableOpacity onPress={() => router.push("/agenda")} style={styles.card}>
+          <TouchableOpacity
+            onPress={() => router.push("/agenda")}
+            style={styles.card}
+          >
             <View style={styles.iconBox}>
-              <Image source={require('../assets/images/agenda.png')} style={styles.icon} />
+              <Image
+                source={require("../assets/images/agenda.png")}
+                style={styles.icon}
+              />
             </View>
             <View style={styles.cardContent}>
               <Text style={styles.cardText}>SUA AGENDA</Text>
@@ -134,12 +131,17 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             onPress={() =>
-              Linking.openURL("https://www.ifraldas.com.br/o-que-levar-para-a-maternidade/?utm_term=&utm_campaign=Nova+Performance+Max&utm_source=Google-Ads&utm_medium=Pesquisa+Display")
+              Linking.openURL(
+                "https://www.ifraldas.com.br/o-que-levar-para-a-maternidade/"
+              )
             }
             style={styles.card}
           >
             <View style={styles.iconBox}>
-              <Image source={require('../assets/images/baby-bag.png')} style={styles.icon} />
+              <Image
+                source={require("../assets/images/baby-bag.png")}
+                style={styles.icon}
+              />
             </View>
             <View style={styles.cardContent}>
               <Text style={styles.cardText}>BOLSA DE MATERNIDADE</Text>
@@ -149,12 +151,17 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             onPress={() =>
-              Linking.openURL("https://bvsms.saude.gov.br/bvs/publicacoes/caderneta_gestante_8ed_rev.pdf")
+              Linking.openURL(
+                "https://bvsms.saude.gov.br/bvs/publicacoes/caderneta_gestante_8ed_rev.pdf"
+              )
             }
             style={styles.card}
           >
             <View style={styles.iconBox}>
-              <Image source={require('../assets/images/guide-book.png')} style={styles.icon} />
+              <Image
+                source={require("../assets/images/guide-book.png")}
+                style={styles.icon}
+              />
             </View>
             <View style={styles.cardContent}>
               <Text style={styles.cardText}>CARTEIRA DA GESTANTE</Text>
@@ -169,58 +176,61 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    paddingTop: 1,
+    flexGrow: 1,
+    padding: 24,
     backgroundColor: colors.backgroundTela,
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.purple,
     marginTop: 20,
     marginBottom: 5,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
     margin: 15,
-    textAlign: 'center',
+    textAlign: "center",
+    color: colors.black,
   },
   ultrassom: {
     width: 320,
     height: 180,
     borderRadius: 5,
     marginBottom: 5,
+    alignSelf: "center",
   },
   babyName: {
     fontSize: 25,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.purple,
-    textAlign: 'left',
+    textAlign: "left",
   },
   weeks: {
     fontSize: 14,
-    textAlign: 'left',
+    textAlign: "left",
     marginBottom: 15,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    color: colors.black,
   },
   question: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 10,
     color: colors.purple,
   },
   emojis: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginBottom: 25,
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: colors.purple,
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   cardContainer: {
     backgroundColor: colors.white,
@@ -230,14 +240,15 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
   },
   cardContent: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   cardText: {
     fontSize: 16,
@@ -252,8 +263,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gray[100],
     padding: 12,
     borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 5,
     marginRight: 10,
     width: 40,
@@ -263,39 +274,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     margin: 5,
-    alignContent: 'center',
-  },
-  menuContainer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: screenWidth * 0.8,
-    backgroundColor: 'rgba(118, 44, 97, 0.95)',
-    paddingTop: 60,
-    paddingHorizontal: 20,
-    zIndex: 999,
-    borderTopRightRadius: 40,
-    borderBottomRightRadius: 40,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 30,
-    right: 20,
-  },
-  menuTitle: {
-    color: '#fff',
-    fontSize: 24,
-    marginBottom: 30,
-    fontWeight: 'bold',
-  },
-  menuItem: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 30,
-  },
-
-  menuText: {
-    color: '#fff',
-    fontSize: 16,
+    alignContent: "center",
   },
 });

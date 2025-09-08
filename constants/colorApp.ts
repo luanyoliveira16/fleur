@@ -1,9 +1,11 @@
 export const colors = {
     white: "#fff",    
     
-    backgroundTela: "#fffaf7", 
+    backgroundTela: "#fffaf8", 
 
     purple: "#792a62",
+
+    black: "#000000",
 
     gray: {
         800: "#252525ff",
@@ -11,5 +13,7 @@ export const colors = {
         300: "#888888ff",
         100: "#d9d9d9",
     }
+
+    
 
 }
