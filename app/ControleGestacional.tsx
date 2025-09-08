@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, ActivityIndicator, Dimensions, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
 import Header from '../components/Header';
+import MenuFlutuante from "../components/MenuFlutuante";
 
 import babyImage1 from '../assets/images/baby_left.png';
 import babyImage2 from '../assets/images/baby_right.png';
@@ -78,10 +79,30 @@ const ControleGestacional = () => {
             dias = Number(match[2]);
         }
     }
+const [menuVisible, setMenuVisible] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const slideAnim = useRef(new Animated.Value(-screenWidth * 0.8)).current;
+
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth * 0.8,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
 
     return (
         <View style={{ flex: 1, backgroundColor: '#FFFAF8' }}>
-            <Header />
+            <Header onMenuPress={toggleMenu} />
             <ScrollView contentContainerStyle={styles.container}>
                 <Text style={styles.title}>Controle Gestacional</Text>
 
@@ -162,6 +183,13 @@ const ControleGestacional = () => {
                     <Text style={styles.buttonText}>Atualizar</Text>
                 </TouchableOpacity>
             </ScrollView>
+              {menuVisible && (
+                <MenuFlutuante
+                  visible={menuVisible}
+                  toggleMenu={toggleMenu}
+                  slideAnim={slideAnim}
+                />
+              )}
         </View>
     );
 };

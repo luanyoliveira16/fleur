@@ -1,12 +1,48 @@
-import { FontAwesome, FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons"; 
-import React from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import {
+  FontAwesome,
+  FontAwesome5,
+  Ionicons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import React, { useRef, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert,
+  Animated,
+  Dimensions,
+} from "react-native";
 import Header from "../components/Header";
 import { useRouter } from "expo-router";
 import { auth } from "../services/firebase";
 import { signOut } from "firebase/auth";
+import MenuFlutuante from "../components/MenuFlutuante";
 
 export default function Configuracoes() {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const screenWidth = Dimensions.get("window").width;
+  const slideAnim = useRef(new Animated.Value(-screenWidth * 0.8)).current;
+
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth * 0.8,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -21,7 +57,7 @@ export default function Configuracoes() {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fffaf8" }}>
-      <Header />
+      <Header onMenuPress={toggleMenu} />
 
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Configurações</Text>
@@ -94,12 +130,22 @@ export default function Configuracoes() {
 
         {/* Sair */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.sectionHeader} onPress={handleSignOut}>
+          <TouchableOpacity
+            style={styles.sectionHeader}
+            onPress={handleSignOut}
+          >
             <FontAwesome name="sign-out" size={26} color="#762c61" />
             <Text style={styles.sectionTitle}>Sair do aplicativo</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+      {menuVisible && (
+        <MenuFlutuante
+          visible={menuVisible}
+          toggleMenu={toggleMenu}
+          slideAnim={slideAnim}
+        />
+      )}
     </View>
   );
 }
