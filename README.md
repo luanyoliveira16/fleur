@@ -42,7 +42,7 @@ O **FleurApp** oferece recursos de acompanhamento da gestação, bem como funcio
 git clone https://github.com/luanyoliveira16/fleur.git
 
 # Entre na pasta do projeto
-cd fleurapp
+cd fleur
 
 # Instale as dependências
 npm install
