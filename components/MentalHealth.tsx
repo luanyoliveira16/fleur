@@ -109,7 +109,7 @@ export default function MentalHealth() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fdfdfd",
+    backgroundColor: "#fffaf8",
   },
   headerContainer: {
     width: "100%",
