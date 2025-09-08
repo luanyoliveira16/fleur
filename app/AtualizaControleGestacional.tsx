@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
+  Alert, Dimensions, Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import Header from '../components/Header';
@@ -17,6 +17,9 @@ import {
 } from '../services/gestacaoService';
 import { getGestante, GestanteData } from '../services/gestanteService';
 import { useAuthUser } from '../hooks/useAuthUser';
+import MenuFlutuante from "../components/MenuFlutuante";
+
+
 
 function removeUndefined(obj: any) {
   return JSON.parse(JSON.stringify(obj));
@@ -32,8 +35,32 @@ export default function AtualizaControleGestacional() {
   const [dataConsulta, setDataConsulta] = useState('');
   const [idadeGestacional, setIdadeGestacional] = useState('');
   const [observacoes, setObservacoes] = useState('');
+  const screenWidth = Dimensions.get("window").width;
+  const slideAnim = useRef(new Animated.Value(-screenWidth * 0.8)).current;
+  const [loading, setLoading] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
+
 
   const [bebes, setBebes] = useState<{ nome: string; peso: string; comprimento: string }[]>([]);
+
+
+  const toggleMenu = () => {
+    if (menuVisible) {
+      Animated.timing(slideAnim, {
+        toValue: -screenWidth * 0.8,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => setMenuVisible(false));
+    } else {
+      setMenuVisible(true);
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
 
   useEffect(() => {
     if (!user) return;
@@ -104,7 +131,7 @@ export default function AtualizaControleGestacional() {
 
   return (
       <View style={{ flex: 1, backgroundColor: '#FFFAF8' }}>
-        <Header />
+        <Header onMenuPress={toggleMenu}/>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.title}>Controle Gestacional</Text>
           <Text style={styles.description}>
@@ -214,6 +241,14 @@ export default function AtualizaControleGestacional() {
             )}
           </View>
         </ScrollView>
+        <Text>...</Text>
+        {menuVisible && (
+            <MenuFlutuante
+                visible={menuVisible}
+                toggleMenu={toggleMenu}
+                slideAnim={slideAnim}
+            />
+        )}
       </View>
   );
 }
