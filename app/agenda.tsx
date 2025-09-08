@@ -6,12 +6,12 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Stack } from "expo-router";
 import "../config/calendarLocale";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 // Função para formatar a data no estilo brasileiro com dia da semana
 function formatarDataCompleta(data: string): string {
-  const dateObj = new Date(data);
+  const dateObj = parse(data, "yyyy-MM-dd", new Date());
   const formatado = format(dateObj, "EEEE, dd 'de' MMMM 'de' yyyy", {
     locale: ptBR,
   });
@@ -21,7 +21,7 @@ function formatarDataCompleta(data: string): string {
 export default function Agenda() {
   const router = useRouter();
   const [dataSelecionada, setDataSelecionada] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    format(new Date(), "yyyy-MM-dd")
   );
 
   const [eventos, setEventos] = useState<Record<string, string[]>>({
