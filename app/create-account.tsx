@@ -12,7 +12,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { useRouter } from 'expo-router';
 
-// Validação
+// Validação com Yup
 const schema = yup.object({
   email: yup.string().email('E-mail inválido').required('Campo obrigatório'),
   password: yup.string().min(6, 'Mínimo 6 caracteres').required('Campo obrigatório'),
@@ -22,7 +22,7 @@ const schema = yup.object({
     .required('Campo obrigatório'),
 });
 
-export default function CreateAccountScreen() {
+export default function CriarContaScreen() {
   const { control, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
@@ -31,7 +31,7 @@ export default function CreateAccountScreen() {
   const colors = Colors[colorScheme ?? 'light'];
 
   const errorColor = '#ff3b30';
-  const borderColor ='#DDDDDD';
+  const borderColor = '#DDDDDD';
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +39,6 @@ export default function CreateAccountScreen() {
 
   const router = useRouter();
 
-  // FUNÇÃO ATUALIZADA: envia UID via query string
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
@@ -48,11 +47,10 @@ export default function CreateAccountScreen() {
 
       Alert.alert('Conta criada com sucesso!');
 
-      // envia UID para a tela cadastrar-gestante
-      router.push(`/cadastrar-gestante?uid=${uid}`);
+router.push({ pathname: '/cadastrarGestante', params: { uid } });
     } catch (error) {
       console.error("Erro ao criar conta:", error);
-      Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente mais tarde.');
+      Alert.alert('Erro', 'Não foi possível criar a conta. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -62,9 +60,10 @@ export default function CreateAccountScreen() {
     <ThemedView style={styles.container}>
       <Image
         source={require('../assets/images/icon_flor.jpg')}
-        style={styles.logo} 
-        resizeMode="contain" 
+        style={styles.logo}
+        resizeMode="contain"
       />
+
       <ThemedText type="title" style={styles.title}>Criar conta</ThemedText>
       <ThemedText type="default" style={styles.subtitle}>
         Faça parte do Fleur! Uma comunidade de apoio à maternidade de gestantes num geral.{'\n'}
@@ -87,14 +86,10 @@ export default function CreateAccountScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            {errors.email && (
-              <ThemedText style={{ color: errorColor, fontSize: 12, marginTop: 4 }}>
-                {errors.email.message}
-              </ThemedText>
-            )}
           </ThemedView>
         )}
       />
+      {errors.email && <ThemedText style={styles.errorText}>{errors.email.message}</ThemedText>}
 
       {/* Campo Senha */}
       <Controller
@@ -112,20 +107,15 @@ export default function CreateAccountScreen() {
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.iconRightTouchable}>
               <MaterialIcons
-                name={showConfirmPassword ? 'visibility-off' : 'visibility'}
+                name={showPassword ? 'visibility-off' : 'visibility'}
                 size={22}
                 color="#762C61"
-                style={styles.iconRight}
               />
             </TouchableOpacity>
-            {errors.password && (
-              <ThemedText style={{ color: errorColor, fontSize: 12, marginTop: 4 }}>
-                {errors.password.message}
-              </ThemedText>
-            )}
           </ThemedView>
         )}
       />
+      {errors.password && <ThemedText style={styles.errorText}>{errors.password.message}</ThemedText>}
 
       {/* Campo Confirmar Senha */}
       <Controller
@@ -143,20 +133,15 @@ export default function CreateAccountScreen() {
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.iconRightTouchable}>
               <MaterialIcons
-                name={showPassword ? 'visibility-off' : 'visibility'}
+                name={showConfirmPassword ? 'visibility-off' : 'visibility'}
                 size={22}
                 color="#762C61"
-                style={styles.iconRight}
               />
             </TouchableOpacity>
-            {errors.confirmPassword && (
-              <ThemedText style={{ color: errorColor, fontSize: 12, marginTop: 4 }}>
-                {errors.confirmPassword.message}
-              </ThemedText>
-            )}
           </ThemedView>
         )}
       />
+      {errors.confirmPassword && <ThemedText style={styles.errorText}>{errors.confirmPassword.message}</ThemedText>}
 
       {/* Botão */}
       <TouchableOpacity
@@ -195,27 +180,29 @@ const styles = StyleSheet.create({
   inputWrapper: {
     width: '100%',
     maxWidth: 400,
-    marginBottom: 20,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
     borderRadius: 24,
     borderColor: '#DDDDDD',
-    paddingLeft: 44,
+    paddingLeft: 20,
     paddingRight: 44,
     backgroundColor: '#FFFFFF',
     ...Platform.select({
-        ios: { shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4 },
-        android: { elevation: 2 },
+      ios: { shadowColor: '#000', shadowOpacity: 0.1, shadowOffset: { width: 0, height: 1 }, shadowRadius: 4 },
+      android: { elevation: 2 },
     }),
-  }, 
+  },
   input: { flex: 1, height: 48, color: '#762C61' },
-  iconRightTouchable: { position: 'absolute', right: 1, top: '20%', transform: [{ translateY: -11 }], padding: 4, zIndex: 1 },
-  iconRight: { position: 'absolute', right: 14 },
-  button: { backgroundColor: '#762C61', paddingVertical: 10, paddingHorizontal: 45, borderRadius: 12, marginBottom: 8, alignItems: 'center', alignSelf: 'center' },
+  iconRightTouchable: { position: 'absolute', right: 14, padding: 4, zIndex: 1 },
+  iconRight: { position: 'absolute', left: 14 },
+  button: { backgroundColor: '#762C61', paddingVertical: 10, paddingHorizontal: 45, borderRadius: 12, marginTop: 20 },
   buttonDisabled: { backgroundColor: '#AA86A8' },
   buttonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '500' },
-  logo: { width: 100, height: 80, marginBottom: 1 },
+  logo: { width: 100, height: 80, marginBottom: 10 },
+  errorText: { color: '#ff3b30', fontSize: 12, marginBottom: 8 },
 });
+
 
 
